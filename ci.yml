@@ -1,0 +1,14 @@
+name: CI-Validation
+on:
+  pull_request:
+    branches: [ main, develop ] # Se activa cuando apuntas a estas ramas
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalación y Test
+        run: |
+          # Cambia esto por tus comandos (ej: npm install && npm test)
+          echo "Ejecutando pruebas..."
