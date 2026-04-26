@@ -1,14 +1,34 @@
 name: CI-Validation
+
+# Se activa al abrir una PR hacia main o develop
 on:
   pull_request:
-    branches: [ main, develop ] # Se activa cuando apuntas a estas ramas
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
 
 jobs:
-  test:
+  quality-check:
+    name: "Validación de Código"
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Instalación y Test
-        run: |
-          # Cambia esto por tus comandos (ej: npm install && npm test)
-          echo "Ejecutando pruebas..."
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Versión estable de Node
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar Linter (Estilo)
+        run: npm run lint --if-present
+
+      - name: Ejecutar Tests
+        run: npm test --if-present
+
+      - name: Feedback de éxito
+        run: echo "Todo salió bien, el código es apto para merge."
