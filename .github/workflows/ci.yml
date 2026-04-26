@@ -1,32 +1,35 @@
-name: CI-Validation
+name: Flujo-Total-Automatico
 
 on:
   push:
     branches:
-      - 'feature/*' # Se activa solo cuando subes ramas que empiecen por feature/
+      - 'feature/*' # Se activa al subir ramas feature/
 
 jobs:
-  quality-check:
-    name: "Validación de Código"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "Validando código..."
-
-  create-pr:
-    name: "Auto-Create PR"
-    needs: quality-check # Solo se crea si los tests pasan
+  automation:
+    name: "PR + Merge Automático"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       contents: write
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Create Pull Request
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Crear Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref_name }}
           base: main
-          title: "Auto PR: ${{ github.ref_name }}"
-          body: "Esta PR fue creada automáticamente por el flujo de CI."
+          title: "Auto-Merge: ${{ github.ref_name }}"
+          body: "🤖 PR generada automáticamente."
+
+      - name: Autorizar y Merge
+        if: steps.cpr.outputs.pull-request-number != ''
+        run: |
+          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --merge --auto
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
